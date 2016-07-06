@@ -2,7 +2,9 @@
 \alias{lcopula-package}
 \alias{lcopula}
 \docType{package}
-\title{Liouville copulas}
+\title{
+\packageTitle{lcopula}
+}
 \description{
 \bold{lcopula} provides functions to evaluate and sample Liouville copulas. The code adapted from \code{GumbelLiouville.R} used in Genest and Neslehova (2013) and from the routine \code{LiouvilleFunction.R} used by McNeil and Neslehova (2010) and coded by Alexander McNeil. New implementation draws heavily on functions implemented in the \code{copula} package and derived from work by Hofert, Machler and McNeil (2012).
 
@@ -22,7 +24,9 @@ The copula and survival copula domains of attraction are implemented and the cor
 \author{
 Leo Belzile, with adapted routines from Pr. Alexander J McNeil, Pr. Johanna G Neslehova and Pr. Christian Genest.
 Function \code{K.plot} by Pr. Christian Genest.
-Maintainer: <leo.belzile@epfl.ch>
+
+
+Maintainer: \packageMaintainer{lcopula}
 }
 
 
@@ -47,6 +51,6 @@ Copulae in Mathematical and Quantitative Finance, Lecture Notes in Statistics, 9
 
 
 \keyword{copula}
-\seealso{\code{copula} package
+\seealso{\code{\link[copula:copula-package]{copula}} package
 }
 
