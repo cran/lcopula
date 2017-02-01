@@ -130,12 +130,14 @@ rarchi <-  function(n, family, d, theta){
 #' @export
 #' @seealso \code{\link{Liouville_marginal}}
 #' @examples
+#' \dontrun{
 #' #Multivariate density of Clayton Liouville copula
 #' x <- rliouv(n = 100, family = "clayton", alphavec <- c(2,3), theta = 2)
 #' dliouv(x=x, family="clayton", alphavec=c(2,3), theta=2, TRUE)
 #' #Distribution function, multivariate sample
 #' x <- rliouv(n=100, family="frank", theta=1.5, alphavec=c(2,3))
 #' pliouv(theta=1.5, x=x,family="frank", alphavec=c(2,3))
+#' }
 rliouv <-  function(n = 100, family, alphavec, theta, reverse = FALSE){
   family <-  match.arg(family, c("clayton","gumbel","frank","AMH","joe"))
   alphavec <- as.integer(alphavec)
@@ -168,7 +170,7 @@ rliouv <-  function(n = 100, family, alphavec, theta, reverse = FALSE){
   for (j in 1:d){
     Udata[, j] <-  sliouvm(Xdata[, j], family, alphavec[j], theta)
   }
-  if(reverse == F){
+  if(reverse == FALSE){
     return(Udata)
   } else{
     return(1-Udata)
@@ -196,6 +198,7 @@ rliouv <-  function(n = 100, family, alphavec, theta, reverse = FALSE){
 #' @return a vector  with the corresponding quantile, probability, survival probabilities
 #' @export
 #' @examples
+#' \dontrun{
 #' #Marginal density
 #' samp <- rliouv(n = 100, family = "clayton", alphavec <- c(2,3), theta = 2)
 #' dliouvm(x=samp[,1], family="clayton", alpha=2, theta=2)
@@ -206,6 +209,7 @@ rliouv <-  function(n = 100, family, alphavec, theta, reverse = FALSE){
 #' su <- sliouvm(1-x[,1], family="gumbel", alpha=alphavec[1], theta=2)
 #' isliouvm(u=su, family="clayton", alpha=2, theta=2)
 #' #pliouv is the same as sliouv(isliouvm)
+#' }
 #' @rdname  Liouville_marginal
 #' @export
 sliouvm <- function(x, family, alpha, theta){
@@ -220,13 +224,13 @@ sliouvm <- function(x, family, alpha, theta){
                joe = copJoe@psi(t = x, theta))
   if(alpha>1){
   for(i in 1:(alpha-1)){
-      out <-  out + exp(i*log(x)-lgamma(i+1)+
+      out <-  out + exp(i*log(ifelse(is.infinite(x),1e40,x))-lgamma(i+1)+
                         switch(family,
-                               gumbel = copGumbel@absdPsi(x, theta = theta, degree = i, log = T),
-                               clayton = copClayton@absdPsi(x*theta, theta = theta, degree = i, log = T)+i*log(theta),
-                               frank = copFrank@absdPsi(x, theta = theta, degree = i, log = T),
-                               AMH = copAMH@absdPsi(x, theta = theta, degree = i, log = T),
-                               joe = copJoe@absdPsi(x, theta = theta, degree = i, log = T))
+                               gumbel = copGumbel@absdPsi(x, theta = theta, degree = i, log = TRUE),
+                               clayton = copClayton@absdPsi(x*theta, theta = theta, degree = i, log = TRUE)+i*log(theta),
+                               frank = copFrank@absdPsi(x, theta = theta, degree = i, log = TRUE),
+                               AMH = copAMH@absdPsi(x, theta = theta, degree = i, log = TRUE),
+                               joe = copJoe@absdPsi(x, theta = theta, degree = i, log = TRUE))
       )
   }
   }
@@ -274,11 +278,11 @@ sliouv_m <- function(x, family, alphavec, theta){
     if(alpha > 1){
       for(i in 1:(alpha-1)){
         der[i+1, ] <-  exp(i*log(x)-lgamma(i+1)+switch(family,
-                                                     gumbel = copGumbel@absdPsi(x, theta = theta, degree = i, log = T),
-                                                     clayton = copClayton@absdPsi(x*theta, theta = theta, degree = i, log = T)+i*log(theta),
-                                                     frank = copFrank@absdPsi(x, theta = theta, degree = i, log = T),
-                                                     AMH = copAMH@absdPsi(x, theta = theta, degree = i, log = T),
-                                                     joe = copJoe@absdPsi(x, theta = theta, degree = i, log = T)))
+                                                     gumbel = copGumbel@absdPsi(x, theta = theta, degree = i, log = TRUE),
+                                                     clayton = copClayton@absdPsi(x*theta, theta = theta, degree = i, log = TRUE)+i*log(theta),
+                                                     frank = copFrank@absdPsi(x, theta = theta, degree = i, log = TRUE),
+                                                     AMH = copAMH@absdPsi(x, theta = theta, degree = i, log = TRUE),
+                                                     joe = copJoe@absdPsi(x, theta = theta, degree = i, log = TRUE)))
       }
     }
     return(colSums(der))
@@ -316,7 +320,7 @@ isliouvm <-  function(u, family, alpha, theta){
     #Handling of 0 for the Gumbel
     tmp <-  uniroot(rootfunc, lower = -1e60, upper = 1e+60, u = u[i], f.lower=1-u[i], f.upper=-u[i],
     	#f.lower = 1, f.upper = -1e+60,
-                   family = family, theta = theta, alpha = alpha)
+                   extendInt="downX", family = family, theta = theta, alpha = alpha)
        if(tmp$root > 1e58){#Beyond numerical precision, probably not needed
       	tmp$root <- Inf
       } else if(tmp$root < -1e40){
@@ -329,7 +333,7 @@ isliouvm <-  function(u, family, alpha, theta){
 
 ##########################################################################
 #' Multiple marginal inverse survival function of Liouville vectors
-#<
+#'
 #' This function is a wrapper around \code{\link{isliouvm}}; it allows the user to treat all the data matrix simultaneously
 #' by applying different parameters to each margin.
 #' @param u vector of survival probabilities
@@ -338,15 +342,14 @@ isliouvm <-  function(u, family, alpha, theta){
 #' @param theta parameter of the corresponding Archimedean copula
 #' @return a vector of same length as \code{u} with the quantile at 1-u
 #' @examples
-#' u <- rliouv(n = 100, family = "clayton", alphavec <- c(2,3), theta = 2)
-#' isliouvm_m(u=u, family="clayton", alphavec=c(2,3), theta=2)
-isliouvm_m <-  function(u, family, alphavec, theta){
+#' u <- rliouv(n = 10, family = "clayton", alphavec <- c(2,3), theta = 2)
+#' isliouv_m(u=u, family="clayton", alphavec=c(2,3), theta=2)
+isliouv_m <-  function(u, family, alphavec, theta){
   alphavec <- as.integer(alphavec)
   if(isTRUE(any(alphavec==0))){stop("Invalid parameters")}
   family <-  match.arg(family, c("clayton", "gumbel", "frank", "AMH", "joe"))
   out <-  matrix(nrow = nrow(u), ncol = ncol(u))
-  rootfunc <-  function(z, u, family, theta, alpha)
-  {
+  rootfunc <-  function(z, u, family, theta, alpha)  {
     sliouvm(exp(z), family, alpha, theta)-u
   }
   for (i in 1:nrow(u)){
@@ -379,30 +382,47 @@ sliouv <- function(theta, x, family, alphavec){
   if(isTRUE(c(any(alphavec==0), any(x<0)))){stop("Invalid parameters")}
   family <-  match.arg(family, c("clayton", "gumbel", "frank", "AMH", "joe"))
   combo = unique(combn(unlist(sapply(alphavec, function(y){seq(1:y)})), length(alphavec)), MARGIN = 2)-1
-  result = apply(combo, 2, function(alpha_combo){
-    apply(x, 1, function(x){
-      if(sum(alpha_combo) != 0){
-        exp(sum(alpha_combo*log(x))-sum(lgamma(alpha_combo+1))+
-         switch(family,
-                gumbel = copGumbel@absdPsi(sum(x), theta = theta, degree = sum(alpha_combo), log = T),
-                clayton = copClayton@absdPsi(t = theta*sum(x), theta = theta, degree = sum(alpha_combo), log = T) +
-                  sum(alpha_combo)*log(theta),
-                frank = copFrank@absdPsi(sum(x), theta = theta, degree = sum(alpha_combo), log = T),
-                AMH = copAMH@absdPsi(sum(x), theta = theta, degree = sum(alpha_combo), log = T),
-                joe = copJoe@absdPsi(sum(x), theta = theta, degree = sum(alpha_combo), log = T)))
+
+  surv <- function(x, alphasubvec){
+    if(length(alphasubvec)!=length(x)){stop("Invalid call to `surv' in function `sliouv'")}
+    if(sum(alphasubvec) != 0){
+      a <- alphasubvec*log(x)
+      if(isTRUE(any(alphasubvec==0, is.infinite(x)))){#Dealing with limit cases on the boundary,
+        #for which the formula ain't valid - setting the function to zero b/c the generator only matters in the limit
+        a[union(which(alphasubvec==0),which(is.infinite(x)))] <- 0
+      }
+        #Yields 0*Inf or similar problematic cases
+        exp(sum(a)-sum(lgamma(alphasubvec+1)) +
+          switch(family,
+                 gumbel = copGumbel@absdPsi(sum(x), theta = theta, degree = sum(alphasubvec), log = TRUE),
+                 clayton = copClayton@absdPsi(t = theta*sum(x), theta = theta, degree = sum(alphasubvec), log = TRUE) +
+                   sum(alphasubvec)*log(theta),
+                 frank = copFrank@absdPsi(sum(x), theta = theta, degree = sum(alphasubvec), log = TRUE),
+                 AMH = copAMH@absdPsi(sum(x), theta = theta, degree = sum(alphasubvec), log = TRUE),
+                 joe = copJoe@absdPsi(sum(x), theta = theta, degree = sum(alphasubvec), log = TRUE)))
       } else {
-          		switch(family,
-                    gumbel = copGumbel@psi(sum(x), theta = theta),
-                    clayton = copClayton@psi(t = theta*sum(x), theta = theta),
-                    frank = copFrank@psi(sum(x), theta = theta),
-                    AMH = copAMH@psi(sum(x), theta = theta),
-                    joe = copJoe@psi(sum(x), theta = theta))
+      switch(family,
+             gumbel = copGumbel@psi(sum(x), theta = theta),
+             clayton = copClayton@psi(t = theta*sum(x), theta = theta),
+             frank = copFrank@psi(sum(x), theta = theta),
+             AMH = copAMH@psi(sum(x), theta = theta),
+             joe = copJoe@psi(sum(x), theta = theta))
+    }
+  }
+
+  result = apply(combo, 2, function(alpha_combo){
+      if(is.matrix(x)){
+         apply(x,1, function(x){surv(x, alphasubvec=alpha_combo)})
+       } else{
+       surv(x)
       }
     }
-    )
-  }
   )
-  return(rowSums(result))
+  if(is.matrix(x)){
+    return(rowSums(result))
+  } else{
+    return(sum(result))
+  }
 }
 
 ##########################################################################
@@ -418,7 +438,7 @@ pliouv <- function(x, theta, family, alphavec){
   alphavec <- as.integer(alphavec)
   if(isTRUE(any(alphavec==0))){stop("Invalid parameters")}
   family <-  match.arg(family, c("clayton", "gumbel", "frank", "AMH", "joe"))
-  sliouv(theta, isliouvm_m(x, family, alphavec, theta), family, alphavec)
+  sliouv(theta, isliouv_m(x, family, alphavec, theta), family, alphavec)
 }
 
 ##########################################################################
@@ -437,14 +457,14 @@ dliouv <- function(x, family, alphavec, theta, is.log = FALSE){
   alpha <-  sum(alphavec)
   x.norm <-  rowSums(x)
   psi.alpha <-  switch(family,
-                      gumbel = copGumbel@absdPsi(x.norm, theta = theta, degree = alpha, log = T),
-                      clayton = copClayton@absdPsi(x.norm*theta, theta = theta, degree = alpha, log = T)+alpha*log(theta),
-                      frank = copFrank@absdPsi(x.norm, theta = theta, degree = alpha, log = T),
-                      AMH = copAMH@absdPsi(x.norm, theta = theta, degree = alpha, log = T),
-                      joe = copJoe@absdPsi(x.norm, theta = theta, degree = alpha, log = T))
+                      gumbel = copGumbel@absdPsi(x.norm, theta = theta, degree = alpha, log = TRUE),
+                      clayton = copClayton@absdPsi(x.norm*theta, theta = theta, degree = alpha, log = TRUE)+alpha*log(theta),
+                      frank = copFrank@absdPsi(x.norm, theta = theta, degree = alpha, log = TRUE),
+                      AMH = copAMH@absdPsi(x.norm, theta = theta, degree = alpha, log = TRUE),
+                      joe = copJoe@absdPsi(x.norm, theta = theta, degree = alpha, log = TRUE))
   arg1 <-  t(apply(x, 1, function(x){(alphavec-1)*log(x)}))
   return_val <-  sum(arg1)+sum(psi.alpha)-dim(x)[1]*sum(lgamma(alphavec))
-  if(is.log == T){return(return_val)
+  if(is.log){return(return_val)
   } else{
     return(exp(return_val))
   }
@@ -482,7 +502,7 @@ dliouvm <-  function(x, family, alpha, theta){
 #' @param MC.approx whether to use Monte-Carlo approximation for the inverse survival function (default is \code{TRUE})
 #'
 #' @return value of marginal density
-.pliouv.opt_old <-  function(theta, data, family, alphavec, MC.approx = T){
+.pliouv.opt_old <-  function(theta, data, family, alphavec, MC.approx = TRUE){
   alphavec <- as.integer(alphavec)
   if(isTRUE(any(alphavec==0))){stop("Invalid parameters")}
   family <-  match.arg(family, c("clayton", "gumbel", "frank", "AMH", "joe"))
@@ -498,18 +518,18 @@ dliouvm <-  function(x, family, alpha, theta){
   n <-  dim(data)[1]
   d <-  dim(data)[2]
   Xdata = data
-  if(MC.approx == T){
+  if(MC.approx){
     Xdata <-  H_inv(data, alphavec = alphavec, family = family, theta = theta)
   }
   Xmargin <-  data
   for (j in 1:d)
   {
-    if(MC.approx == F){
+    if(!MC.approx){
       Xdata[, j] <-  isliouvm(data[, j], family, alphavec[j], theta)
     }
     Xmargin[, j] <-  log(dliouvm(Xdata[, j], family, alphavec[j], theta))
   }
-  numerator.log <-  dliouv(Xdata, family, alphavec, theta, is.log = T)
+  numerator.log <-  dliouv(Xdata, family, alphavec, theta, is.log = TRUE)
   denominator.log <-  sum(Xmargin)
   numerator.log - denominator.log
 }
@@ -526,7 +546,7 @@ dliouvm <-  function(x, family, alpha, theta){
 #' @param MC.approx whether to use Monte-Carlo approximation for the inverse survival function (default is \code{TRUE})
 #'
 #' @return value of marginal density
-pliouv.opt <-  function(theta, data, family, alphavec, MC.approx = T){
+pliouv.opt <-  function(theta, data, family, alphavec, MC.approx = TRUE){
   family <-  match.arg(family, c("clayton", "gumbel", "frank", "AMH", "joe"))
   #changed order of parameters for optimization functions
   illegalpar <-  switch(family,
@@ -540,29 +560,29 @@ pliouv.opt <-  function(theta, data, family, alphavec, MC.approx = T){
   n <-  dim(data)[1]
   d <-  dim(data)[2]
   Xdata = data
-  if(MC.approx == T){
+  if(MC.approx == TRUE){
     Xdata <-  H_inv(data, alphavec = alphavec, family = family, theta = theta)
   }
   Xmargin <-  data
   for (j in 1:d){
-    if(MC.approx == F){
+    if(MC.approx == FALSE){
       Xdata[, j] <-  isliouvm(data[, j], family, alphavec[j], theta)
     }
     Xmargin[, j] <-  switch(family,
-                          gumbel = copGumbel@absdPsi(Xdata[, j], theta = theta, degree = alphavec[j], log = T),
-                          clayton = copClayton@absdPsi(t = theta*Xdata[, j], theta, degree = alphavec[j], log = T),
-                          frank = copFrank@absdPsi(Xdata[, j], theta = theta, degree = alphavec[j], log = T),
-                          AMH = copAMH@absdPsi(Xdata[, j], theta = theta, degree = alphavec[j], log = T),
-                          joe = copJoe@absdPsi(Xdata[, j], theta = theta, degree = alphavec[j], log = T)
+                          gumbel = copGumbel@absdPsi(Xdata[, j], theta = theta, degree = alphavec[j], log = TRUE),
+                          clayton = copClayton@absdPsi(t = theta*Xdata[, j], theta, degree = alphavec[j], log = TRUE),
+                          frank = copFrank@absdPsi(Xdata[, j], theta = theta, degree = alphavec[j], log = TRUE),
+                          AMH = copAMH@absdPsi(Xdata[, j], theta = theta, degree = alphavec[j], log = TRUE),
+                          joe = copJoe@absdPsi(Xdata[, j], theta = theta, degree = alphavec[j], log = TRUE)
     )
   }
   alpha = sum(alphavec)
   numerator.log <-  sum(switch(family,
-                              gumbel = copGumbel@absdPsi(rowSums(Xdata), theta = theta, degree = alpha, log = T),
-                              clayton = copClayton@absdPsi(t = theta*rowSums(Xdata), theta, degree = alpha, log = T),
-                              frank = copFrank@absdPsi(rowSums(Xdata), theta = theta, degree = alpha, log = T),
-                              AMH = copAMH@absdPsi(rowSums(Xdata), theta = theta, degree = alpha, log = T),
-                              joe = copJoe@absdPsi(rowSums(Xdata), theta = theta, degree = alpha, log = T)
+                              gumbel = copGumbel@absdPsi(rowSums(Xdata), theta = theta, degree = alpha, log = TRUE),
+                              clayton = copClayton@absdPsi(t = theta*rowSums(Xdata), theta, degree = alpha, log = TRUE),
+                              frank = copFrank@absdPsi(rowSums(Xdata), theta = theta, degree = alpha, log = TRUE),
+                              AMH = copAMH@absdPsi(rowSums(Xdata), theta = theta, degree = alpha, log = TRUE),
+                              joe = copJoe@absdPsi(rowSums(Xdata), theta = theta, degree = alpha, log = TRUE)
   ))
   denominator.log <-  sum(Xmargin)
   numerator.log - denominator.log
@@ -592,11 +612,11 @@ pliouv.opt <-  function(theta, data, family, alphavec, MC.approx = T){
 #'  liouv.maxim(data=data, family="j", interval=c(1.25,3), boundary=c(2,2),return_all=TRUE)
 #'  lattice.mat <- t(combn(1:3,2))
 #'  liouv.maxim(data=data, family="j", interval=c(1.25,3), lattice.mat=lattice.mat, return_all=FALSE)
+#'  #data <- rliouv(n=1000, family="gumbel", alphavec=c(1,2), theta=2)
+#'  liouv.maxim.mm(data=data, family="gumbel", boundary=c(3,3),return_all=TRUE)
+#'  lattice.mat <- t(combn(1:3,2))
+#'  liouv.maxim.mm(data=data, family="gumbel", lattice.mat=lattice.mat, return_all=FALSE)
 #' }
-#' data <- rliouv(n=1000, family="gumbel", alphavec=c(1,2), theta=2)
-#' liouv.maxim.mm(data=data, family="gumbel", boundary=c(3,3),return_all=TRUE)
-#' lattice.mat <- t(combn(1:3,2))
-#' liouv.maxim.mm(data=data, family="gumbel", lattice.mat=lattice.mat, return_all=FALSE)
 liouv.maxim <- function(data, family, interval, boundary = NULL, lattice.mat = NULL, return_all = FALSE, MC.approx = TRUE){
   family <-  match.arg(family, c("clayton", "gumbel", "frank", "AMH", "joe"))
   stopifnot(!is.null(lattice.mat) || !is.null(boundary))
@@ -629,7 +649,7 @@ liouv.maxim <- function(data, family, interval, boundary = NULL, lattice.mat = N
   lattice.vec <- lattice.mat[i,]
   # Choice of maximization function, see http://cran.r-project.org/web/views/Optimization.html
   res <- optimise(pliouv.opt, data = data, family = family, alphavec = lattice.vec,
-             interval = interval, maximum = T, MC.approx = MC.approx)
+             interval = interval, maximum = TRUE, MC.approx = MC.approx)
    theta_array[matrix(lattice.vec, 1)] <- res$maximum
     like_array[matrix(lattice.vec, 1)] <- res$objective
   }
@@ -649,7 +669,7 @@ liouv.maxim <- function(data, family, interval, boundary = NULL, lattice.mat = N
 ##########################################################################
 ## Maximize copula likelihood function for Liouville copulas via methods of moments
 #' @export
-liouv.maxim.mm <- function(data, family, boundary = NULL, lattice.mat = NULL, return_all = FALSE, MC.approx = T){
+liouv.maxim.mm <- function(data, family, boundary = NULL, lattice.mat = NULL, return_all = FALSE, MC.approx = TRUE){
   family <-  match.arg(family, c("clayton", "gumbel", "frank", "AMH", "joe"))
   stopifnot(!is.null(lattice.mat) || !is.null(boundary))
   if(is.null(lattice.mat)){
@@ -713,13 +733,13 @@ liouv.maxim.mm <- function(data, family, boundary = NULL, lattice.mat = NULL, re
   if(family == "gumbel"){
     express_coef_gumb <- function(index_k, index_l, theta, a){
       if(index_l == 0){
-        d1 <- .coeffG(d = index_k, alpha = 1/theta, method = "direct", log = T)
+        d1 <- .coeffG(d = index_k, alpha = 1/theta, method = "direct", log = TRUE)
         intern <- seq(1:index_k)
         d2 <- lgamma(intern)-intern*log(2)
         return(theta*sum(exp(d1+d2))/gamma(a))
       }      else{
-        d1 <- outer(.coeffG(d = index_k, alpha = 1/theta, method = "direct", log = T),
-                  .coeffG(d = index_l, alpha = 1/theta, method = "direct", log = T), "+")
+        d1 <- outer(.coeffG(d = index_k, alpha = 1/theta, method = "direct", log = TRUE),
+                  .coeffG(d = index_l, alpha = 1/theta, method = "direct", log = TRUE), "+")
         intern <- outer(seq(1:index_k), seq(1:index_l), "+")
         d2 <- lgamma(intern)-intern*log(2)
         return(theta*sum(exp(d1+d2))/gamma(a))
@@ -806,12 +826,14 @@ liouv.iTau = Vectorize(.liouv.iTau_s, "tau_hat")
 #'
 #' @return Inverse survival function values
 #' @examples
+#' \dontrun{
 #' u <- rliouv(n = 100, family = "frank", alphavec <- c(2,3), theta = 1)
 #' H_inv(u=u, family="frank", alphavec=c(2,3), theta=2)
 #' #Difference between true value and approximation (can be large depending on family)
 #' sum(abs(H_inv(u=u, family="frank", alphavec=c(2,3), theta=2)-
-#' isliouvm_m(u=u, family="frank", alphavec=c(2,3), theta=2)))
-H_inv <-  function(u, alphavec, family, theta, MC = 100000, TRUNC = F){
+#' isliouv_m(u=u, family="frank", alphavec=c(2,3), theta=2)))
+#' }
+H_inv <-  function(u, alphavec, family, theta, MC = 100000, TRUNC = FALSE){
   alphavec <- as.integer(alphavec)
   if(isTRUE(any(alphavec==0))){stop("Invalid parameters")}
   family <-  match.arg(family, c("clayton", "gumbel", "frank", "AMH", "joe"))
@@ -831,13 +853,13 @@ H_inv <-  function(u, alphavec, family, theta, MC = 100000, TRUNC = F){
   for(i in 1:length(alphavec)){
     inverse = cbind(inverse, as.numeric(quantile(mc[, i], probs = (1-u[, i]))))
   }
-  if(TRUNC == T){
-    hquant = which(u<0.025, arr.ind = T)
+  if(TRUNC){
+    hquant = which(u<0.025, arr.ind = TRUE)
     for(i in 1:(dim(hquant)[1])){
       inverse[hquant[i, 1], hquant[i, 2]] = 	isliouvm(u[hquant[i, 1], hquant[i, 2]], family, alphavec[hquant[i, 2]], theta)
     }
 
-    hquant = which(u>0.975, arr.ind = T)
+    hquant = which(u>0.975, arr.ind = TRUE)
     for(i in 1:(dim(hquant)[1])){
       inverse[hquant[i, 1], hquant[i, 2]] = 	isliouvm(u[hquant[i, 1], hquant[i, 2]], family, alphavec[hquant[i, 2]], theta)
     }
@@ -957,13 +979,13 @@ switch(Meth, sort = {
 #' @return Gumbel coefficient
 express_coef_gumb <- function(index_k, index_l, theta, a){
   if(index_l == 0){
-    d1 <- .coeffG(d = index_k, alpha = 1/theta, method = "direct", log = T)
+    d1 <- .coeffG(d = index_k, alpha = 1/theta, method = "direct", log = TRUE)
     intern <- seq(1:index_k)
     d2 <- lgamma(intern)-intern*log(2)
     return(theta*sum(exp(d1+d2))/gamma(a))
   }  else{
-    d1 <- outer(.coeffG(d = index_k, alpha = 1/theta, method = "direct", log = T),
-              .coeffG(d = index_l, alpha = 1/theta, method = "direct", log = T), "+")
+    d1 <- outer(.coeffG(d = index_k, alpha = 1/theta, method = "direct", log = TRUE),
+              .coeffG(d = index_l, alpha = 1/theta, method = "direct", log = TRUE), "+")
     intern <- outer(seq(1:index_k), seq(1:index_l), "+")
     d2 <- lgamma(intern)-intern*log(2)
     return(theta*sum(exp(d1+d2))/gamma(a))
@@ -991,9 +1013,11 @@ express_coef_gumb <- function(index_k, index_l, theta, a){
 #' @param quant if the vector of probability is specified, the function will return the corresponding bootstrap quantiles
 #' @param silent boolean for output progress. Default is \code{FALSE}, which means iterations are printed if \eqn{d>2}.
 #' @examples
-#' theta.bci(B=99, family="gumbel", alphavec=c(2,3), n=1000, theta.hat=2)
-#' ## theta.bci(B=19, family="AMH", alphavec=c(1,2), n=100, theta.hat=0.5, quant=c(0.05,0.95))
-#' ## theta.bci(B=19, family="frank", alphavec=c(1,2,3), n=100, theta.hat=0.5, quant=c(0.05,0.95))
+#' \dontrun{
+#' theta.bci(B=99, family="gumbel", alphavec=c(2,3), n=100, theta.hat=2)
+#' theta.bci(B=19, family="AMH", alphavec=c(1,2), n=100, theta.hat=0.5, quant=c(0.05,0.95))
+#' theta.bci(B=19, family="frank", alphavec=c(1,2,3), n=100, theta.hat=0.5, quant=c(0.05,0.95))
+#' }
 #' @return a list with a 95% confidence inteval unless selected quantiles \code{quant} are supplied
 #' and the bootstrap values of Kendall's tau in \code{boot_tau} if \eqn{d=2} and the model is either \code{gumbel} or \code{clayton}.
 #' Otherwise, the list contains \code{boot_theta}.

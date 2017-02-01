@@ -1,8 +1,8 @@
 Package: lcopula
 Type: Package
 Title: Liouville Copulas
-Version: 0.206
-Date: 2016-07-05
+Version: 1.0
+Date: 2017-01-23
 Authors@R: c(person("Leo", "Belzile", role = c("aut", "cre"),
                      email = "leo.belzile@epfl.ch"),
               person("Christian", " Genest", role = c("aut","ctb")),
@@ -16,11 +16,11 @@ Depends: copula (>= 0.999-12), R (>= 2.12.0)
 LinkingTo: Rcpp
 RoxygenNote: 5.0.1
 NeedsCompilation: yes
-Packaged: 2016-07-06 08:13:09 UTC; lbelzile
+Packaged: 2017-02-01 15:12:48 UTC; lbelzile
 Author: Leo Belzile [aut, cre],
   Christian Genest [aut, ctb],
   Alexander J. McNeil [ctb],
   Johanna G. Neslehova [ctb]
 Maintainer: Leo Belzile <leo.belzile@epfl.ch>
 Repository: CRAN
-Date/Publication: 2016-07-06 14:56:47
+Date/Publication: 2017-02-01 16:46:23
