@@ -2,10 +2,10 @@
 % Please edit documentation in R/liouville.R
 \name{Liouville_marginal}
 \alias{Liouville_marginal}
+\alias{sliouvm}
+\alias{pliouvm}
 \alias{dliouvm}
 \alias{isliouvm}
-\alias{pliouvm}
-\alias{sliouvm}
 \title{Liouville vectors marginal functions}
 \usage{
 sliouvm(x, family, alpha, theta)
@@ -51,4 +51,3 @@ isliouvm(u=su, family="clayton", alpha=2, theta=2)
 #pliouv is the same as sliouv(isliouvm)
 }
 }
-

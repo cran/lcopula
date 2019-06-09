@@ -4,8 +4,8 @@
 \alias{theta.bci}
 \title{Parametric bootstrap confidence interval for the parameter \code{theta} for Liouville copula}
 \usage{
-theta.bci(B = 1999, family, alphavec, n, theta.hat, quant = c(0.025, 0.975),
-  silent = FALSE)
+theta.bci(B = 1999, family, alphavec, n, theta.hat, quant = c(0.025,
+  0.975), silent = FALSE)
 }
 \arguments{
 \item{B}{number of bootstrap replicates}
@@ -45,4 +45,3 @@ theta.bci(B=19, family="AMH", alphavec=c(1,2), n=100, theta.hat=0.5, quant=c(0.0
 theta.bci(B=19, family="frank", alphavec=c(1,2,3), n=100, theta.hat=0.5, quant=c(0.05,0.95))
 }
 }
-
