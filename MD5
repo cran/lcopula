@@ -1,10 +1,11 @@
-318415b00f939296b55c3a41bf1e9b67 *DESCRIPTION
+f1e539d59a5ec0f0de6531db6f1e5dca *DESCRIPTION
 da97ebb74005e18880d674f053ef6a17 *NAMESPACE
-458b8cd501dd824ba2a38e8a76e58214 *NEWS
+795fda643e2f6dc6f98f49f79ec28638 *NEWS
 7d7a694abc9286cb2878513ff2f93665 *R/RcppExports.R
+171fb4c9ab427a2dd11358c4b78f58ba *R/datasetdocu.R
 b0fc968aa8c0d9b38e2ff8be8fc59f4d *R/liouville.R
 938507e4f994ab1d1e3857e5f75aa000 *R/liouville_extreme.R
-fb9411607064c0d9c615fb53ccfc7ace *build/partial.rdb
+ec153b89148c0eb2533994493e6ac26c *build/partial.rdb
 403579063a36a434aa9eb503c139ebc3 *data/airquality.rda
 5f7cc01adb5a3f8f4b53a4d728e3ba96 *data/danube.rda
 fb3437285dc0923099e997123bf26b67 *data/nutrient.rda
@@ -14,8 +15,8 @@ e33abd9ed9a75b7deaf9d06417986e44 *man/H_inv.Rd
 a1d8583d3c4abcb5696da2497f2a7abc *man/K.plot.Rd
 8f805a5546e7d6c87b237785ad2190f7 *man/Liouville.Rd
 8108230168e0482d7021ff39ba9eac16 *man/Liouville_marginal.Rd
-b26fddb187543b4e79106002cbfdae1e *man/airquality.Rd
-086298b9d541aac7e60851acd8d7348d *man/danube.Rd
+f1032e94dc0beb2ebf6229f6651d94ff *man/airquality.Rd
+12f4b583d7d3dba0baccdd34ed4910e4 *man/danube.Rd
 08c4aceee092f1d3b2e301af35f731d8 *man/dirspecdens.Rd
 c79bf19e86dee948e9dfa8e9c322b9b1 *man/dot-ctspecdens.Rd
 2d7eab16050ac959169fb32348a4edd0 *man/dot-liouv.Tau_s.Rd
@@ -33,7 +34,7 @@ d16ee1e7379956ff0cf002939a985469 *man/liouv.Tau.Rd
 f49de4074804eca201b338444b62a198 *man/liouv.iTau.Rd
 2a62ca6e0be47a6b5b044ffc2099700d *man/liouv.maxim.Rd
 ec7eebbe68de3a0473d82515b6892e41 *man/negdirspecdens.Rd
-ea4d0b8e479c3e606331a3e32067b7a8 *man/nutrient.Rd
+439f2321fa93cfdb0d728f5decd9a8a9 *man/nutrient.Rd
 40c2bc66c1e1f7ae2ec305084dadde41 *man/pickands.liouv.Rd
 4c4053236a194c2b755ffcffb0689d07 *man/pickands.plot.Rd
 142e45207ee68450867222733338b241 *man/pliouv.opt.Rd
@@ -44,4 +45,4 @@ f8ab95e10c56abe341ce1c68cef2e3f5 *man/theta.bci.Rd
 3d7f9a78639543d51bb127039317d412 *src/RcppExports.cpp
 693e5471c0de8e0dee668a01ee4ca1a4 *src/generic.cpp
 3eb4d94d923995466cd36503693974f8 *src/lcopula-init.c
-349d86faace524eaf1a9241954d0c156 *src/spectral_densities.cpp
+c1112eb78a4e09588be0bf83a6c4a20c *src/spectral_densities.cpp
